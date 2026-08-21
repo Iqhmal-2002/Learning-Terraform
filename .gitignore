@@ -1,0 +1,20 @@
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Scratch — local-only working files, never pushed
+scratch/
+*.local.md
+
+# Secrets — never commit these
+.env
+*.pem
+*.key
+credentials*
