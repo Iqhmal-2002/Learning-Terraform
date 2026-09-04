@@ -9,6 +9,7 @@ az login
 
 # Check Acc
 az account show
+az account show --output table
 
 # If you don't see subscription output, list them explicitly
 az account list --output table
@@ -48,3 +49,15 @@ terraform state
 
 # Delete
 terraform delete
+
+# List every .tf file in directory
+dir *.tf*
+
+# Check the type of file
+type variables.tf
+
+# Query all output
+terraform output
+
+# Query specific output
+terraform output resource_group_id
