@@ -7,6 +7,13 @@ terraform {
       version = "~> 3.0.2"
     }
   }
+  cloud {
+    organization = "Learning_Terraform_2026"
+    workspaces {
+      name = "learn-terraform-azure"
+    }
+  }
+
 }
 
 provider "azurerm" {

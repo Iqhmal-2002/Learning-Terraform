@@ -61,3 +61,6 @@ terraform output
 
 # Query specific output
 terraform output resource_group_id
+
+# Login to terraform
+terraform login
