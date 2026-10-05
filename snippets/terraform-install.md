@@ -64,3 +64,6 @@ terraform output resource_group_id
 
 # Login to terraform
 terraform login
+
+# input value using file
+terraform plan -var-file="dev.tfvars"
