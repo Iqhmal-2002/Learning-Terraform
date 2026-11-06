@@ -1,0 +1,7 @@
+#cloud-config
+packages:
+  - apache2
+runcmd:
+  - a2enmod ssl
+  - a2ensite default-ssl
+  - systemctl reload apache2
