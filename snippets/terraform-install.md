@@ -48,7 +48,7 @@ terraform state list
 terraform state
 
 # Delete
-terraform delete
+terraform destroy
 
 # List every .tf file in directory
 dir *.tf*
