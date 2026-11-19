@@ -17,6 +17,7 @@ provider "azurerm" {
 }
 
 variable "prefix" {
+  type    = string
   default = "terraform"
 }
 
@@ -82,15 +83,27 @@ resource "azurerm_linux_virtual_machine" "example" {
 # Configure the AWS Provider
 provider "aws" {
   profile = "default"
-  region = "ap-southeast-2"
+  region  = "ap-southeast-2"
+}
+
+variable "aws_instance_type" {
+  type = string
+  #default = "t3.micro"
+}
+
+locals {
+  project_name = "terraform"
 }
 
 resource "aws_instance" "instance_1" {
   ami           = "ami-013f66a12d3857f32"
-  instance_type = "t3.micro"
+  instance_type = var.aws_instance_type
 
   tags = {
-    Name = "MyServer"
+    Name = "MyServer-${local.project_name}"
   }
 }
 
+output "aws_instance_public_ip" {
+  value = aws_instance.instance_1.public_ip
+}

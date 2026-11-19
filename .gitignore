@@ -24,7 +24,6 @@ credentials*
 **/.terraform/*
 *.tfstate
 *.tfstate.backup
-.terraform.lock.hcl
 *.tfstate.*
 .terraform.tfstate.lock.info
 crash.log
