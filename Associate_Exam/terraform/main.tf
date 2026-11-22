@@ -1,4 +1,10 @@
 terraform {
+  cloud {
+    organization = "Learning_Terraform_2026"
+    workspaces {
+      name = "terraform"
+    }
+  }
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -117,13 +123,17 @@ output "aws_instance_public_ip" {
   value = aws_instance.instance_1.public_ip
 }
 
+// Sample of using terraform module to create VPC in AWS 
+// 1 of 38 have issues due to free tier limit, so commented out for now
+// Also personally dont really like using modules pulled from the registry 
+// so will just use the resource blocks instead and making my own modules later on if needed
+/*
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
   
-  /*
-  providers = {
-    aws = aws.west-1
-  }*/
+  # providers = {
+  #   aws = aws.west-1
+  # }
 
   name = "my-vpc"
   cidr = "10.0.0.0/16"
@@ -140,3 +150,4 @@ module "vpc" {
     Environment = "dev"
   }
 }
+*/
