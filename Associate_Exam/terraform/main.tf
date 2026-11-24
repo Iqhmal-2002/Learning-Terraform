@@ -17,6 +17,10 @@ terraform {
   }
 }
 
+###################################################################################
+# Azure Provider and Resources
+###################################################################################
+
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
@@ -86,6 +90,10 @@ resource "azurerm_linux_virtual_machine" "example" {
   }
 }
 
+###################################################################################
+# AWS Provider and Resources
+###################################################################################
+
 # Configure the AWS Provider
 provider "aws" {
   profile = "default"
@@ -102,7 +110,7 @@ provider "aws" {
 }*/
 
 variable "aws_instance_type" {
-  type = string
+  type    = string
   default = "t3.micro"
 }
 
@@ -111,8 +119,30 @@ locals {
 }
 
 resource "aws_instance" "instance_1" {
-  ami           = "ami-013f66a12d3857f32"
-  instance_type = var.aws_instance_type
+  ami                    = "ami-013f66a12d3857f32"
+  instance_type          = var.aws_instance_type
+  key_name               = aws_key_pair.kp1.key_name
+  vpc_security_group_ids = [aws_security_group.ssh.id]
+  provisioner "local-exec" {
+    command = "echo ${self.private_ip} > private_ip.txt"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "echo hello from terraform > /tmp/hello.txt",
+      "cat /tmp/hello.txt",
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = file("~/.ssh/id_rsa")
+      host        = self.public_ip
+    }
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "echo instance ${self.id} destroyed >> destroy_log.txt"
+  }
 
   tags = {
     Name = "MyServer-${local.project_name}"
@@ -121,6 +151,29 @@ resource "aws_instance" "instance_1" {
 
 output "aws_instance_public_ip" {
   value = aws_instance.instance_1.public_ip
+}
+
+resource "aws_key_pair" "kp1" {
+  key_name   = "terraform-key"
+  public_key = file("~/.ssh/id_rsa.pub") # the key you made for the Azure VM
+}
+
+resource "aws_security_group" "ssh" {
+  name = "allow-ssh"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["161.142.152.79/32"] # your IP only, not 0.0.0.0/0
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 // Sample of using terraform module to create VPC in AWS 

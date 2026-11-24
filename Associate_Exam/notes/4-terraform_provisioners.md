@@ -42,3 +42,18 @@ Entry point of the command - the local program that will run the command (Bash, 
 
 Environment
 Key and value pair of environments variables
+
+## Remote-exec
+Execute command on target resource after a resource is provisioned (probably the VM you create)
+Useful for simple stuff, but realistically production is never simple so its not really preferred, use cloud-init instead
+
+Inline - list of command string
+
+Script/Scripts - relative or absolute local script(s) that will be copied to the remote resource then executed in order
+
+## File Provisioner
+Source - local file we want to upload
+
+Content - a file or folder
+
+Destination - Where to upload the file on the remote machine
