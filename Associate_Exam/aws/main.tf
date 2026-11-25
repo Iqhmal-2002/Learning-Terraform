@@ -14,17 +14,19 @@ terraform {
       source  = "hashicorp/http"
       version = "~> 3.0"
     }
+    // terraform_data is a new resource type that replaces null_resource, and no need provider for it
+    /*
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }*/
   }
 }
-
-###################################################################################
-# AWS Provider and Resources
-###################################################################################
 
 # Configure the AWS Provider
 provider "aws" {
   profile = "default"
-  region  = "ap-southeast-2"
+  region  = local.region
 }
 
 // Changing region requires advanced feature
@@ -43,6 +45,7 @@ variable "aws_instance_type" {
 
 locals {
   project_name = "terraform"
+  region       = "ap-southeast-2"
 }
 
 resource "aws_instance" "instance_1" {
@@ -116,6 +119,24 @@ resource "aws_security_group" "ssh" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+// null_resource is deprecated, use terraform_data instead
+// ~/.aws/config has credentials for aws, but no region since I didnt set it
+// localexec runs seperately on my local machine, 
+resource "terraform_data" "status" {
+  triggers_replace = [aws_instance.instance_1.id]
+  provisioner "local-exec" {
+    command = "aws ec2 wait instance-status-ok --instance-ids ${aws_instance.instance_1.id}"
+    environment = {
+      AWS_REGION  = local.region
+      AWS_PROFILE = "default"
+    }
+  }
+  /*
+  depends_on = [
+    aws_instance.instance_1
+    ]*/
 }
 
 // Sample of using terraform module to create VPC in AWS 
