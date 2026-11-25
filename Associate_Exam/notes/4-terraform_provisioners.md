@@ -57,3 +57,13 @@ Source - local file we want to upload
 Content - a file or folder
 
 Destination - Where to upload the file on the remote machine
+
+## Connection 
+A connection block tells provisioner or resource how to establish a connection
+
+ssh can connect through Bastion host
+
+## Null resources
+Placeholder for resources that have no association to provider resources
+
+Triggers is a map of values that will cause provisioners to rerun

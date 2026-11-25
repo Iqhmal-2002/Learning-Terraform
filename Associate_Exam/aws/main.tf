@@ -2,91 +2,18 @@ terraform {
   cloud {
     organization = "Learning_Terraform_2026"
     workspaces {
-      name = "terraform"
+      name = "terraform-aws"
     }
   }
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "=5.0.0"
-    }
     aws = {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
-  }
-}
-
-###################################################################################
-# Azure Provider and Resources
-###################################################################################
-
-# Configure the Microsoft Azure Provider
-provider "azurerm" {
-  features {}
-}
-
-variable "prefix" {
-  type    = string
-  default = "terraform"
-}
-
-resource "azurerm_resource_group" "rg1" {
-  name     = "${var.prefix}-resources"
-  location = "eastus"
-}
-
-resource "azurerm_virtual_network" "vn1" {
-  name                = "${var.prefix}-network"
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.rg1.location
-  resource_group_name = azurerm_resource_group.rg1.name
-}
-
-resource "azurerm_subnet" "subnet1" {
-  name                 = "internal"
-  resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.vn1.name
-  address_prefixes     = ["10.0.2.0/24"]
-}
-
-resource "azurerm_network_interface" "nic1" {
-  name                = "${var.prefix}-nic"
-  location            = azurerm_resource_group.rg1.location
-  resource_group_name = azurerm_resource_group.rg1.name
-
-  ip_configuration {
-    name                          = "testconfiguration1"
-    subnet_id                     = azurerm_subnet.subnet1.id
-    private_ip_address_allocation = "Dynamic"
-  }
-}
-
-resource "azurerm_linux_virtual_machine" "example" {
-  name                = "example-machine"
-  resource_group_name = azurerm_resource_group.rg1.name
-  location            = azurerm_resource_group.rg1.location
-  size                = "Standard_D2as_v4"
-  admin_username      = "adminuser"
-  network_interface_ids = [
-    azurerm_network_interface.nic1.id,
-  ]
-
-  admin_ssh_key {
-    username   = "adminuser"
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -143,6 +70,17 @@ resource "aws_instance" "instance_1" {
     when    = destroy
     command = "echo instance ${self.id} destroyed >> destroy_log.txt"
   }
+  provisioner "file" {
+    content = "file provisioner"
+    destination = "/home/ec2-user/barsoon.txt"
+
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = file("~/.ssh/id_rsa")
+      host        = self.public_ip
+    }
+  }
 
   tags = {
     Name = "MyServer-${local.project_name}"
@@ -158,6 +96,10 @@ resource "aws_key_pair" "kp1" {
   public_key = file("~/.ssh/id_rsa.pub") # the key you made for the Azure VM
 }
 
+data "http" "myip" {
+  url = "https://checkip.amazonaws.com"
+}
+
 resource "aws_security_group" "ssh" {
   name = "allow-ssh"
 
@@ -165,7 +107,7 @@ resource "aws_security_group" "ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["161.142.152.79/32"] # your IP only, not 0.0.0.0/0
+    cidr_blocks = ["${chomp(data.http.myip.response_body)}/32"] # your IP only, not 0.0.0.0/0
   }
 
   egress {

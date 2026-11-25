@@ -1,0 +1,4 @@
+instance i-09f5fb194753f11bc destroyed 
+instance i-0e2a0e97bc6f9db7f destroyed 
+instance i-07c64a4ad311f8a49 destroyed 
+instance i-0bc4f517a426e7e63 destroyed 
